@@ -8,101 +8,125 @@ class User:
     
     # Check if a user with the given id already exists
     def exists(self, id: int) -> bool:
-        res = c.execute("""SELECT * 
-                            FROM users 
-                            WHERE id=%d""" % id)
-        conn.commit()
-        return res.fetchone() != None
+        try:
+            res = c.execute("""SELECT * 
+                                FROM users 
+                                WHERE id=%d""" % id)
+            conn.commit()
+            return res.fetchone() != None
+        except:
+            print("Error while executing a query.")
     
     # Get size of the database
     def size(self) -> int:
-        res = c.execute("SELECT COUNT(*) FROM users")
-        conn.commit()
-        return res.fetchone()[0]
+        try:
+            res = c.execute("SELECT COUNT(*) FROM users")
+            conn.commit()
+            return res.fetchone()[0]
+        except:
+            print("Error while executing a query.")
 
     # Insert user info into table
     def create(self, user_info: dict) -> int:
-
-        if not self.valid_info(list(user_info.values())):
-            print('>>Please enter valid user details')
-            return -1
-        
-        res = c.execute("SELECT COUNT(*) FROM users")
-        for row in res:
-            id = row[0]
-        
-        c.execute("""INSERT INTO users 
-                     VALUES (%d, '%s', '%s', '%d', '%s', '%s')""" 
-                     % (id, user_info['firstname'], user_info['lastname'], user_info['age'], user_info['password'], user_info['email']))
-        conn.commit()
-        return id
+        try:
+            if not self.valid_info(list(user_info.values())):
+                print('>>Please enter valid user details')
+                return -1
+            
+            res = c.execute("SELECT COUNT(*) FROM users")
+            for row in res:
+                id = row[0]
+            
+            c.execute("""INSERT INTO users 
+                        VALUES (%d, '%s', '%s', '%d', '%s', '%s')""" 
+                        % (id, user_info['firstname'], user_info['lastname'], user_info['age'], user_info['password'], user_info['email']))
+            conn.commit()
+            return id
+        except:
+            print("Error while executing a query.")
     
     # Get user from table by user id
     def get(self, user_id: int) -> dict:
-        res = c.execute("""SELECT * 
-                            FROM users 
-                            WHERE id=%d""" % user_id)
-        conn.commit()
-        data = res.fetchone()
-        if data == None:
-            return '>>User with id "%d" does not exist' % user_id
-        
-        return {
-                'id': data[0],
-                'firstname': data[1],
-                'lastname': data[2],
-                'age': data[3],
-                'password': data[4],
-                'email': data[5],
-            }
+        try:
+            res = c.execute("""SELECT * 
+                                FROM users 
+                                WHERE id=%d""" % user_id)
+            conn.commit()
+            data = res.fetchone()
+            if data == None:
+                return '>>User with id "%d" does not exist' % user_id
+            
+            return {
+                    'id': data[0],
+                    'firstname': data[1],
+                    'lastname': data[2],
+                    'age': data[3],
+                    'password': data[4],
+                    'email': data[5],
+                }
+        except:
+            print("Error while executing a query.")
+
     
     # Get all entries from the table
     def all(self) -> list:
-        res = c.execute("SELECT * FROM users")
-        conn.commit()
-        users = []
-        for row in res:
-            if row == None:
-                return '">>my_user_app" database is empty'
-            users.append({
-                'id': row[0],
-                'firstname': row[1],
-                'lastname': row[2],
-                'age': row[3],
-                'password': row[4],
-                'email': row[5],
-            })
-        return users
+        try:
+            res = c.execute("SELECT * FROM users")
+            conn.commit()
+            users = []
+            for row in res:
+                if row == None:
+                    return '">>my_user_app" database is empty'
+                users.append({
+                    'id': row[0],
+                    'firstname': row[1],
+                    'lastname': row[2],
+                    'age': row[3],
+                    'password': row[4],
+                    'email': row[5],
+                })
+            return users
+        except:
+            print("Error while executing a query.")
     
     # Update user's attribute with the given value
     def update(self, user_id: int, attribute: str, value: str or int) -> dict:
-        if type(value) == str:
-            query = """UPDATE users 
-                        SET %s='%s' 
-                        WHERE id=%d""" % (attribute, value, user_id)
-        else:
-            query = """UPDATE users 
-                        SET %s=%d 
-                        WHERE id=%d""" % (attribute, value, user_id)
-        
-        c.execute(query)
-        conn.commit()
-        return self.get(user_id)
+        try:
+            if type(value) == str:
+                query = """UPDATE users 
+                            SET %s='%s' 
+                            WHERE id=%d""" % (attribute, value, user_id)
+            else:
+                query = """UPDATE users 
+                            SET %s=%d 
+                            WHERE id=%d""" % (attribute, value, user_id)
+            
+            c.execute(query)
+            conn.commit()
+            return self.get(user_id)
+        except:
+            print("Error while executing a query.")
 
     # Delete the user from table
     def destroy(self, user_id: int) -> None:
-        if not self.exists(user_id):
-            print('>>User with id "%d" does not exist' % user_id)
-            return
-        
-        c.execute("""DELETE FROM users 
-                        WHERE id=%d""" % user_id)
-        conn.commit()
+        try:
+            if not self.exists(user_id):
+                print('>>User with id "%d" does not exist' % user_id)
+                return
+            
+            c.execute("""DELETE FROM users 
+                            WHERE id=%d""" % user_id)
+            conn.commit()
+        except:
+            print("Error while executing a query.")
 
     # Delete all rows in the table
     def destroy_all(self) -> None:
-        c.execute("DELETE FROM users")
-        conn.commit()
+        try:
+            c.execute("DELETE FROM users")
+            conn.commit()
+        except:
+            print("Error while executing a query.")
     
     # Print single user hash
     def print_user(self, user_info: dict) -> None:
@@ -198,8 +222,11 @@ class User:
                 "email": "guzman.mills@mail.tv"
             }
         ]
-        for user in users:
-            self.create(user)
+        try:
+            for user in users:
+                self.create(user)
+        except:
+            print("Error while executing a query.")
 
 
 # Function to test the database
@@ -253,27 +280,30 @@ def test():
     user.print_users(None)
 
 if __name__ == "__main__":
-    # Connect to database
-    conn = sqlite3.connect('my_user_app.db')
+    try:
+        # Connect to database
+        conn = sqlite3.connect('my_user_app.db')
 
-    # Create a cursor
-    c = conn.cursor()
+        # Create a cursor
+        c = conn.cursor()
 
-    # Create a Table
-    c.execute("""CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
-        firstname TEXT,
-        lastname TEXT,
-        age INTEGER,
-        password TEXT,
-        email TEXT
-    )""")
+        # Create a Table
+        c.execute("""CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            firstname TEXT,
+            lastname TEXT,
+            age INTEGER,
+            password TEXT,
+            email TEXT
+        )""")
 
-    # Commit the command
-    conn.commit()
+        # Commit the command
+        conn.commit()
 
-    # Uncomment the line below to test the database
-    test()
+        # Uncomment the line below to test the database
+        # test()
 
-    # Close the connection
-    conn.close()
+        # Close the connection
+        conn.close()
+    except:
+        print("Error while executing a query.")
