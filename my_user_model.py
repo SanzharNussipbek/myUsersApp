@@ -20,6 +20,7 @@ class User:
             return res
         except:
             print("Error while executing a query.")
+            return None
     
     # Get size of the database
     def size(self) -> int:
@@ -53,6 +54,7 @@ class User:
             return id
         except:
             print("Error while executing a query.")
+            return -1
     
     # Get user from table by user id
     def get(self, user_id: int) -> dict:
@@ -78,7 +80,25 @@ class User:
             conn.close()
         except:
             print("Error while executing a query.")
+            return {}
 
+    def get_id(self, attribute: str, value: str) -> id:
+        try:
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
+            res = c.execute("""SELECT id 
+                                FROM users 
+                                WHERE %s='%s'""" % (attribute, value))
+            conn.commit()
+            data = res.fetchone()
+            if data == None:
+                return '>>User with %s "%s" does not exist' % (attribute, value)
+            
+            return data[0]
+            conn.close()
+        except:
+            print("Error while executing a query.")
+            return -1
     
     # Get all entries from the table
     def all(self, password = True) -> list:
@@ -105,6 +125,7 @@ class User:
             return users
         except:
             print("Error while executing a query.")
+            return []
     
     # Update user's attribute with the given value
     def update(self, user_id: int, attribute: str, value: str or int) -> dict:
@@ -125,6 +146,7 @@ class User:
             return self.get(user_id)
         except:
             print("Error while executing a query.")
+            return {}
 
     # Delete the user from table
     def destroy(self, user_id: int) -> None:
