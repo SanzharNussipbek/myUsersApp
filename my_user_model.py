@@ -9,38 +9,47 @@ class User:
     # Check if a user with the given id already exists
     def exists(self, id: int) -> bool:
         try:
-            res = c.execute("""SELECT * 
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
+            res = c.execute("""SELECT COUNT(*) 
                                 FROM users 
                                 WHERE id=%d""" % id)
             conn.commit()
-            return res.fetchone() != None
+            res = res.fetchone() != 0
+            conn.close()
+            return res
         except:
             print("Error while executing a query.")
     
     # Get size of the database
     def size(self) -> int:
         try:
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
             res = c.execute("SELECT COUNT(*) FROM users")
             conn.commit()
-            return res.fetchone()[0]
+            size = res.fetchone()[0]
+            conn.close()
+            return size
         except:
-            print("Error while executing a query.")
+            print("Error while executing a query (size).")
+            return -1
 
     # Insert user info into table
     def create(self, user_info: dict) -> int:
         try:
-            if not self.valid_info(list(user_info.values())):
-                print('>>Please enter valid user details')
-                return -1
-            
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
             res = c.execute("SELECT COUNT(*) FROM users")
+            conn.commit()
             for row in res:
                 id = row[0]
             
             c.execute("""INSERT INTO users 
                         VALUES (%d, '%s', '%s', '%d', '%s', '%s')""" 
-                        % (id, user_info['firstname'], user_info['lastname'], user_info['age'], user_info['password'], user_info['email']))
+                        % (id, user_info['firstname'], user_info['lastname'], int(user_info['age']), user_info['password'], user_info['email']))
             conn.commit()
+            conn.close()
             return id
         except:
             print("Error while executing a query.")
@@ -48,6 +57,8 @@ class User:
     # Get user from table by user id
     def get(self, user_id: int) -> dict:
         try:
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
             res = c.execute("""SELECT * 
                                 FROM users 
                                 WHERE id=%d""" % user_id)
@@ -64,27 +75,33 @@ class User:
                     'password': data[4],
                     'email': data[5],
                 }
+            conn.close()
         except:
             print("Error while executing a query.")
 
     
     # Get all entries from the table
-    def all(self) -> list:
+    def all(self, password = True) -> list:
         try:
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
             res = c.execute("SELECT * FROM users")
             conn.commit()
             users = []
             for row in res:
                 if row == None:
                     return '">>my_user_app" database is empty'
-                users.append({
+                user = {
                     'id': row[0],
                     'firstname': row[1],
                     'lastname': row[2],
                     'age': row[3],
-                    'password': row[4],
                     'email': row[5],
-                })
+                }
+
+                if password: user['password'] = row[4]
+                users.append(user)
+            conn.close()
             return users
         except:
             print("Error while executing a query.")
@@ -92,6 +109,8 @@ class User:
     # Update user's attribute with the given value
     def update(self, user_id: int, attribute: str, value: str or int) -> dict:
         try:
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
             if type(value) == str:
                 query = """UPDATE users 
                             SET %s='%s' 
@@ -110,6 +129,8 @@ class User:
     # Delete the user from table
     def destroy(self, user_id: int) -> None:
         try:
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
             if not self.exists(user_id):
                 print('>>User with id "%d" does not exist' % user_id)
                 return
@@ -117,14 +138,18 @@ class User:
             c.execute("""DELETE FROM users 
                             WHERE id=%d""" % user_id)
             conn.commit()
+            conn.close()
         except:
             print("Error while executing a query.")
 
     # Delete all rows in the table
     def destroy_all(self) -> None:
         try:
+            conn = sqlite3.connect('my_user_app.db')
+            c = conn.cursor()
             c.execute("DELETE FROM users")
             conn.commit()
+            conn.close()
         except:
             print("Error while executing a query.")
     
@@ -222,11 +247,8 @@ class User:
                 "email": "guzman.mills@mail.tv"
             }
         ]
-        try:
-            for user in users:
-                self.create(user)
-        except:
-            print("Error while executing a query.")
+        for user in users:
+            self.create(user)
 
 
 # Function to test the database
@@ -238,46 +260,47 @@ def test():
     # Clear the database from previous entries (if needed)
     user.destroy_all()
 
-    # Populate the database
+    # # Populate the database
     user.populate()
 
     # Get the number of users in the database
     print('Size: %d' % user.size())
     
-    # Print users from the database
-    user.print_users(user.all())
+#     # # Print users from the database
+#     # user.print_users(user.all())
     
-    # Print users one by one
-    print('\n>>All users one by one:')
-    for id in range(10):
-        user.print_user(user.get(id))
+#     # # Print users one by one
+#     # print('\n>>All users one by one:')
+#     # for id in range(10):
+#     #     user.print_user(user.get(id))
 
-    # Delete one user from table
-    user.destroy(2)
+#     # # Delete one user from table
+#     # user.destroy(2)
 
-    # Update user info
-    print('\n>Update age of user with id = 0:')
-    user.print_user(user.update(0, 'age', 21))
+#     # # Update user info
+#     # print('\n>Update age of user with id = 0:')
+#     # user.print_user(user.update(0, 'age', 21))
 
-    print('\n>Update first name of user with id = 1:')
-    user.print_user(user.update(1, 'firstname', 'Sanzhar'))
+#     # print('\n>Update first name of user with id = 1:')
+#     # user.print_user(user.update(1, 'firstname', 'Sanzhar'))
 
-    print('\n>Update last name of user with id = 1:')
-    user.print_user(user.update(1, 'lastname', 'Nussipbek'))
+#     # print('\n>Update last name of user with id = 1:')
+#     # user.print_user(user.update(1, 'lastname', 'Nussipbek'))
 
-    # Check get() method for invalid input
-    print(user.get(12))
+
+#     # # Check get() method for invalid input
+#     # print(user.get(12))
     
-    # Check destroy() method for invalid input
-    user.destroy(12)
+#     # # Check destroy() method for invalid input
+#     # user.destroy(12)
 
-    # Check print_user() method for invalid inputs
-    user.print_user({})
-    user.print_user(None)
+#     # # Check print_user() method for invalid inputs
+#     # user.print_user({})
+#     # user.print_user(None)
 
-    # Check print_users() method for invalid inputs
-    user.print_users([])
-    user.print_users(None)
+#     # # Check print_users() method for invalid inputs
+#     # user.print_users([])
+#     # user.print_users(None)
 
 if __name__ == "__main__":
     try:
@@ -300,10 +323,10 @@ if __name__ == "__main__":
         # Commit the command
         conn.commit()
 
-        # Uncomment the line below to test the database
-        # test()
-
         # Close the connection
         conn.close()
     except:
         print("Error while executing a query.")
+
+    # Uncomment the line below to test the database
+    # test()
