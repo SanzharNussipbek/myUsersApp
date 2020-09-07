@@ -1,3 +1,23 @@
+# User class for my user model
+
+# Function prototypes:
+
+#   def create()        - creates new user with the given hash of user info
+#   def all()           - returns the list of user hashes
+#   def get()           - returns the hash with info of the user with the passed use id
+#   def update()        - updates the user's attribute with value and returns that user's hash
+#   def destroy()       - deletes the user with the passed id from the table
+
+#   def destroy_all()   - deletes all the users from the table
+#   def valid_info()    - accepts the list with new user details and checks if the length and the types are correct
+#   def exists()        - checks if the user with the given user_id exists in the table
+#   def size()          - returns the number of entries(users) in the table
+#   def populate()      - populates the table of the users with mock data
+#   def print_users()   - accepts the list of user hashes and prints the user one by one using print_user() function
+#   def print_user()    - accepts the hash of user and prints the keys with values
+
+#   def test()          - to test the user model
+
 import sqlite3
 
 class User:
@@ -7,13 +27,13 @@ class User:
         return len(user_details) == 5 and type(user_details[0]) == str and type(user_details[1]) == str and type(user_details[2]) == int and type(user_details[3]) == str and type(user_details[4]) == str
     
     # Check if a user with the given id already exists
-    def exists(self, id: int) -> bool:
+    def exists(self, user_id: int) -> bool:
         try:
             conn = sqlite3.connect('my_user_app.db')
             c = conn.cursor()
             res = c.execute("""SELECT COUNT(*) 
                                 FROM users 
-                                WHERE id=%d""" % id)
+                                WHERE id=%d""" % user_id)
             conn.commit()
             res = res.fetchone() != 0
             conn.close()
@@ -39,19 +59,23 @@ class User:
     # Insert user info into table
     def create(self, user_info: dict) -> int:
         try:
+            if not self.valid_info(list(user_info.values())):
+                print('User details are not valid.')
+                return -1
+            
             conn = sqlite3.connect('my_user_app.db')
             c = conn.cursor()
             res = c.execute("SELECT COUNT(*) FROM users")
             conn.commit()
             for row in res:
-                id = row[0]
+                user_id = row[0]
             
             c.execute("""INSERT INTO users 
                         VALUES (%d, '%s', '%s', '%d', '%s', '%s')""" 
-                        % (id, user_info['firstname'], user_info['lastname'], int(user_info['age']), user_info['password'], user_info['email']))
+                        % (user_id, user_info['firstname'], user_info['lastname'], int(user_info['age']), user_info['password'], user_info['email']))
             conn.commit()
             conn.close()
-            return id
+            return user_id
         except:
             print("Error while executing a query.")
             return -1
@@ -288,41 +312,41 @@ def test():
     # Get the number of users in the database
     print('Size: %d' % user.size())
     
-#     # # Print users from the database
-#     # user.print_users(user.all())
+    # Print users from the database
+    user.print_users(user.all())
     
-#     # # Print users one by one
-#     # print('\n>>All users one by one:')
-#     # for id in range(10):
-#     #     user.print_user(user.get(id))
+    # Print users one by one
+    print('\n>>All users one by one:')
+    for id in range(10):
+        user.print_user(user.get(id))
 
-#     # # Delete one user from table
-#     # user.destroy(2)
+    # Delete one user from table
+    user.destroy(2)
 
-#     # # Update user info
-#     # print('\n>Update age of user with id = 0:')
-#     # user.print_user(user.update(0, 'age', 21))
+    # Update user info
+    print('\n>Update age of user with id = 0:')
+    user.print_user(user.update(0, 'age', 21))
 
-#     # print('\n>Update first name of user with id = 1:')
-#     # user.print_user(user.update(1, 'firstname', 'Sanzhar'))
+    print('\n>Update first name of user with id = 1:')
+    user.print_user(user.update(1, 'firstname', 'Sanzhar'))
 
-#     # print('\n>Update last name of user with id = 1:')
-#     # user.print_user(user.update(1, 'lastname', 'Nussipbek'))
+    print('\n>Update last name of user with id = 1:')
+    user.print_user(user.update(1, 'lastname', 'Nussipbek'))
 
 
-#     # # Check get() method for invalid input
-#     # print(user.get(12))
+    # Check get() method for invalid input
+    print(user.get(12))
     
-#     # # Check destroy() method for invalid input
-#     # user.destroy(12)
+    # Check destroy() method for invalid input
+    user.destroy(12)
 
-#     # # Check print_user() method for invalid inputs
-#     # user.print_user({})
-#     # user.print_user(None)
+    # Check print_user() method for invalid inputs
+    user.print_user({})
+    user.print_user(None)
 
-#     # # Check print_users() method for invalid inputs
-#     # user.print_users([])
-#     # user.print_users(None)
+    # Check print_users() method for invalid inputs
+    user.print_users([])
+    user.print_users(None)
 
 if __name__ == "__main__":
     try:
