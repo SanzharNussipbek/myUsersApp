@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, render_template
 from flask_restful import Resource, Api
 from sqlalchemy import create_engine
 from json import dumps, loads
@@ -10,7 +10,7 @@ from session import Session
 
 e = create_engine('sqlite:///my_user_app.db')
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='views')
 app.config['JSON_SORT_KEYS'] = False
 session = Session()
 db = User()
@@ -52,7 +52,8 @@ def users():
     
     # GET method
     if request.method == 'GET':
-        return make_response({'users': db.all(password=False)})
+        # return make_response({'users': db.all(password=False)})
+        return render_template("index.html", data = db.all(password=False))
     
     # POST method
     elif request.method == 'POST':
@@ -127,6 +128,12 @@ def sign_in():
             session.sign_in(user_id_email)
         
         return msg
+
+    elif request.method == 'GET':
+        # get the value of loggedIn from the session
+        response = {'loggedIn' : session.loggedIn}
+        
+        return make_response(response)
 
 @app.route('/sign_out', methods=['DELETE'])
 def sign_out():
