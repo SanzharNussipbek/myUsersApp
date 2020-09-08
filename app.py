@@ -55,6 +55,12 @@ def get_data(request):
     return data
 
 
+# default route
+@app.route('/')
+def welcome():
+    return render_template("home.html")
+
+
 # /users route with REST API
 @app.route('/users', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def users():
@@ -71,13 +77,23 @@ def users():
     elif request.method == 'POST':
 
         # get data from the request
-        data = get_data(request)
-        
-        # create new user and get his id
+        # data = get_data(request)
+
+        data = {
+            'firstname' : request.form['firstname'],
+            'lastname' : request.form['lastname'],
+            'age' : request.form['age'],
+            'email' : request.form['email'],
+            'password' : request.form['password'],
+        }
+
+        # create new user and get his id and info
         new_user_id = db.create(data)
+        user = db.get(new_user_id)
 
         # return new user's info by getting him by his id
-        return make_response(db.get(new_user_id))
+        # return make_response(user)
+        return render_template("index.html", data = db.all(password=False))
     
     # PUT method: update the password of the user who is already logged in
     elif request.method == 'PUT':
@@ -117,7 +133,12 @@ def sign_in():
     if request.method == 'POST':
 
         # get data from the request
-        data = get_data(request)
+        # data = get_data(request)
+
+        data = {
+            'email' : request.form['email'],
+            'password': request.form['password']
+        }
 
         # get user's id by his email and password
         user_id_email = db.get_id('email', data['email'])
@@ -145,21 +166,17 @@ def sign_in():
         else:
             session.sign_in(user_id_email)
         
-        return response
-
-    # GET method: get the information of the session
-    elif request.method == 'GET':
-        # get the value of loggedIn from the session
-        response = {'loggedIn' : session.loggedIn}
-
-        # get the user if he is logged in
-        if session.loggedIn:
-            response['user'] = db.get(session.user_id)
+        print('Response:', response)
+        print('Logged in:', session.loggedIn)
         
-        return make_response(response)
+        return render_template("login.html", response = response)
+
+    # GET method: login form
+    elif request.method == 'GET':
+        return render_template("login.html")
 
 # /sign_out route
-@app.route('/sign_out', methods=['DELETE'])
+@app.route('/sign_out', methods=['DELETE', 'GET'])
 def sign_out():
 
     # DELETE method: sign out the user
@@ -175,7 +192,19 @@ def sign_out():
         # sign out the user
         session.sign_out()
 
-        return "The user was successfully signed out.\n"
+        return render_template("logout.html")
+
+    # GET method: get the information of the session
+    elif request.method == 'GET':
+        # get the value of loggedIn from the session
+        response = {'loggedIn' : session.loggedIn}
+        print('LOGGED IN' if session.loggedIn else 'NOT LOGGED IN')
+
+        # get the user if he is logged in
+        if session.loggedIn:
+            response['user'] = db.get(session.user_id)
+        
+        return make_response(response)
 
 
 # main function to run the app

@@ -24,7 +24,7 @@ class User:
 
     # Validate new user's details
     def valid_info(self, user_details: list) -> bool:
-        return len(user_details) == 5 and type(user_details[0]) == str and type(user_details[1]) == str and type(user_details[2]) == int and type(user_details[3]) == str and type(user_details[4]) == str
+        return len(user_details) == 5 and type(user_details[0]) == str and type(user_details[1]) == str and (type(user_details[2]) == int or type(user_details[2]) == str) and type(user_details[3]) == str and type(user_details[4]) == str
     
     # Check if a user with the given id already exists
     def exists(self, user_id: int) -> bool:
@@ -260,7 +260,7 @@ class User:
             {
                 "firstname": "Newton",
                 "lastname": "Mccoy",
-                "age": 259,
+                "age": 25,
                 "password": "amet5f52296cd4df48e4dcb4604a",
                 "email": "newton.mccoy@mail.biz"
             },
@@ -373,6 +373,17 @@ if __name__ == "__main__":
         conn.close()
     except:
         print("Error while executing a query.")
+
+        # Create User object
+    user = User()
+
+    # Clear the database from previous entries (if needed)
+    user.destroy_all()
+
+    # # Populate the database
+    user.populate()
+
+    # user.print_users(user.all())
 
     # Uncomment the line below to test the database
     # test()

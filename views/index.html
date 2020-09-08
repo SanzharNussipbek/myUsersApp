@@ -4,36 +4,99 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
         <title>Users index page</title>
+
+        <style> 
+            .form {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .link {
+                cursor: pointer;
+            }
+
+            .table-responsive {
+                padding: 2.5rem 1.5rem;
+                height: auto;
+                overflow-y: visible;
+                overflow-x: visible;
+            }
+        </style>
     </head>
     <body class="bg-info">
-        <div class="container vh-100 d-flex flex-column justify-content-center align-items-center">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+        <div class="container-fluid vh-100 d-flex flex-column justify-content-center align-items-center">
+            <div class="row">
+                <div class="form col-md-4">
+                    <h1 class="text-center">Add a User</h1>
+                    <form action="/users" method="POST" class="bg-light form shadow p-3 mb-5 bg-white rounded" id="myForm">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                              <label for="inputEmail4">FirstName</label>
+                              <input type="text" class="form-control" name="firstname" id="inputFirstName" placeholder="First Name" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                              <label for="inputPassword4">LastName</label>
+                              <input type="text" class="form-control" name="lastname" id="inputLastName" placeholder="Last Name" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                              <label for="inputPassword4">Age</label>
+                              <input type="number" class="form-control" name="age" id="inputAge" placeholder="Age" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                              <label for="inputEmail4">Email</label>
+                              <input type="email" class="form-control" name="email" id="inputEmail4" placeholder="Email" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                              <label for="inputPassword4">Password</label>
+                              <input type="password" class="form-control" name="password" id="inputPassword4" placeholder="Password" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">POST</button>
+                    </form>
+                </div>
+
+                <div class="table-responsive col-md-8">
                     <h1 class="text-center">Users</h1>
-                    <thead class="thead-dark">
-                        <tr>
-                            <th scope="col">FirstName</th>
-                            <th scope="col">LastName</th>
-                            <th scope="col">Age</th>
-                            <th scope="col">Email</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-striped">
-                        <ul>
-                            {% for user in data %}
-                            <tr class="table-light">
-                                <td scope="row">{{user.firstname}}</td>
-                                <td>{{user.lastname}}</td>
-                                <td>{{user.age}}</td>
-                                <td>{{user.email}}</td>
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">FirstName</th>
+                                <th scope="col">LastName</th>
+                                <th scope="col">Age</th>
+                                <th scope="col">Email</th>
                             </tr>
-                            {% endfor %}
-                        </ul>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="table-striped">
+                            <ul>
+                                {% for user in data %}
+                                    <tr class="table-light" data-href="https://google.com">
+                                        <a href="#" class="link">
+                                            <td scope="row">{{user.firstname}}</td>
+                                            <td>{{user.lastname}}</td>
+                                            <td>{{user.age}}</td>
+                                            <td>{{user.email}}</td>
+                                        </a>
+                                    </tr>
+                                {% endfor %}
+                            </ul>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-    </div>
+        </div>
+        <script type="text/javascript">      
+            let form = document.querySelector("#myForm");
+            form.addEventListener("submit", function (event) {
+                HTMLFormElement.prototype.submit.call(form);
+                event.preventDefault();
+                return false;
+            });
+        </script>
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
