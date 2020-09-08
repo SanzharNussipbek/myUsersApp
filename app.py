@@ -71,7 +71,13 @@ def users():
     # GET method: return the list with all the users
     if request.method == 'GET':
         # Render the template with the table and pass the data
-        return render_template("index.html", data = db.all(password=False))
+        auth = 'Sign in' if not session.loggedIn else ''
+        profile = {
+            'text': 'My Profile' if session.loggedIn else '',
+            'id' : session.user_id if session.loggedIn else ''
+        }
+        
+        return render_template("index.html", data = db.all(password=False), auth = auth, profile=profile)
     
     # POST method: create a new user
     elif request.method == 'POST':
@@ -93,7 +99,13 @@ def users():
 
         # return new user's info by getting him by his id
         # return make_response(user)
-        return render_template("index.html", data = db.all(password=False))
+
+        auth = 'Sign in' if not session.loggedIn else ''
+        profile = {
+            'text': 'My Profile' if session.loggedIn else '',
+            'id' : session.user_id if session.loggedIn else ''
+        }
+        return render_template("index.html", data = db.all(password=False), auth = auth, profile=profile)
     
     # PUT method: update the password of the user who is already logged in
     elif request.method == 'PUT':
@@ -103,11 +115,11 @@ def users():
             return "Please login to change the password.\n"
         
         # get data from the request
-        data = get_data(request)
+        # data = get_data(request)
 
         # update the user
-        user = db.update(session.user_id, 'password', data['password'])
-
+        user = db.update(session.user_id, 'password', request.form['password'])
+        
         # return the user info
         return make_response(user)
     
@@ -123,7 +135,11 @@ def users():
         # sign out the user
         session.sign_out()
 
-        return "The user was successfully signed out and deleted.\n"
+        profile = {
+            'text': 'My Profile' if session.loggedIn else '',
+            'id' : session.user_id if session.loggedIn else ''
+        }
+        return render_template("index.html", data = db.all(password=False), response = "The user was successfully signed out and deleted.\n", auth=auth,profile=profile)
 
 # /sign_in route
 @app.route('/sign_in', methods=['POST', 'GET'])
@@ -148,28 +164,25 @@ def sign_in():
             return "This user is already logged in.\n"
 
         # set the default message
-        response = "The user was successfully signed in.\n"
+        response = ["The user was successfully signed in.\n","success"]
 
         # check if there isn't any user with the given email
         if user_id_email == None:
-            response = "A user with this email does not exist.\n"
+            response = ["A user with this email does not exist.\n", "danger"]
         
         # check if there isn't any user with the given email
         elif user_id_password == None:
-            response = "A user with this password does not exist.\n"
+            response = ["A user with this password does not exist.\n", "danger"]
         
         # check if the email and password ids do not match
         elif user_id_email != user_id_password:
-            response = "The email or password is not correct. Please try again.\n"
+            response = ["The email or password is not correct. Please try again.\n", "danger"]
         
         # sign in the user
         else:
             session.sign_in(user_id_email)
         
-        print('Response:', response)
-        print('Logged in:', session.loggedIn)
-        
-        return render_template("login.html", response = response)
+        return render_template("login.html", response = response[0], color=response[1])
 
     # GET method: login form
     elif request.method == 'GET':
@@ -186,25 +199,27 @@ def sign_out():
         if not session.loggedIn:
             return "Please login to sign out.\n"
 
-        # get data from the request
-        data = get_data(request)
-
         # sign out the user
         session.sign_out()
 
-        return render_template("logout.html")
+        return render_template("index.html", data=db.all(password=False), auth = "Sign in", profile={'text':'', 'id': ''})
 
     # GET method: get the information of the session
     elif request.method == 'GET':
         # get the value of loggedIn from the session
         response = {'loggedIn' : session.loggedIn}
-        print('LOGGED IN' if session.loggedIn else 'NOT LOGGED IN')
 
         # get the user if he is logged in
         if session.loggedIn:
             response['user'] = db.get(session.user_id)
         
         return make_response(response)
+
+# /users/:user_id route for profile page
+@app.route('/users/<int:user_id>', methods=['GET'])
+def user(user_id):
+    return render_template("profile.html", user = db.get(user_id))
+    
 
 
 # main function to run the app

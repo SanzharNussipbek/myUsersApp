@@ -7,20 +7,22 @@
     <title>Welcome</title>
 
     <style>
-        
+        a, a:hover {
+            text-decoration: none;
+            outline: none;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid bg-dark text-light vh-100 d-flex flex-column justify-content-center align-items-center">
-        <h1 class="display-1">Welcome to <b>My Users App</b></h1>
+        <h1 class="display-1">Welcome to <b class="text-primary">My Users App</b></h1>
 
-        <div class="links">
-            <h3 class="display-3">You can go to:</h3>
-            <ul class="list-unstyled text-center">
-                <h3><a href="/users" class="stretched-link text-light"><li>Users</li></a></h3>
-                <!-- <h3><a href="/sign_in" class="stretched-link text-light"><li>Sign In</li></a></h3> -->
-                <!-- <h3><a href="/sign_out" class="stretched-link text-light"><li>Sign Out</li></a></h3> -->
-            </ul>
+        <div class="text-center col-md-2">
+            <h3>
+                <a href="/users" class="stretched-link text-info">
+                    Go to Users
+                </a>
+            </h3>
         </div>
     </div>
 

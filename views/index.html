@@ -16,48 +16,98 @@
                 cursor: pointer;
             }
 
+            .nav-link:empty{
+                display: none;
+            }
+
             .table-responsive {
                 padding: 2.5rem 1.5rem;
                 height: auto;
+                max-width: 60%;
                 overflow-y: visible;
                 overflow-x: visible;
+            }
+            
+            .row {
+                margin-top: 1rem;
+            }
+
+            tr {
+                cursor: pointer;
             }
         </style>
     </head>
     <body class="bg-info">
         <div class="container-fluid vh-100 d-flex flex-column justify-content-center align-items-center">
+            <div class="navbar">
+                <a class="nav-link btn btn-success btn-lg" href="/sign_in">{{auth}}</a>
+                <a class="nav-link btn btn-success btn-lg" href="/users/{{profile.id}}">{{profile.text}}</a>
+            </div>
             <div class="row">
                 <div class="form col-md-4">
-                    <h1 class="text-center">Add a User</h1>
-                    <form action="/users" method="POST" class="bg-light form shadow p-3 mb-5 bg-white rounded" id="myForm">
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                              <label for="inputEmail4">FirstName</label>
-                              <input type="text" class="form-control" name="firstname" id="inputFirstName" placeholder="First Name" required>
+                    <div>
+                        <h1 class="text-center">Add a User</h1>
+                        <form action="/users" method="POST" class="bg-light form shadow p-3 mb-5 bg-white rounded" id="postForm">
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label for="inputEmail4">First Name</label>
+                                    <input type="text" class="form-control" name="firstname" id="inputFirstName" placeholder="First Name" required>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="inputPassword4">Last Name</label>
+                                    <input type="text" class="form-control" name="lastname" id="inputLastName" placeholder="Last Name" required>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label for="inputPassword4">Age</label>
+                                    <input type="number" class="form-control" name="age" id="inputAge" placeholder="Age" required>
+                                </div>
                             </div>
-                            <div class="form-group col-md-4">
-                              <label for="inputPassword4">LastName</label>
-                              <input type="text" class="form-control" name="lastname" id="inputLastName" placeholder="Last Name" required>
-                            </div>
-                            <div class="form-group col-md-4">
-                              <label for="inputPassword4">Age</label>
-                              <input type="number" class="form-control" name="age" id="inputAge" placeholder="Age" required>
-                            </div>
-                        </div>
 
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                              <label for="inputEmail4">Email</label>
-                              <input type="email" class="form-control" name="email" id="inputEmail4" placeholder="Email" required>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="inputEmail4">Email</label>
+                                    <input type="email" class="form-control" name="email" id="inputEmail4" placeholder="Email" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="inputPassword4">Password</label>
+                                    <input type="password" class="form-control" name="password" id="inputPassword4" placeholder="Password" required>
+                                </div>
                             </div>
-                            <div class="form-group col-md-6">
-                              <label for="inputPassword4">Password</label>
-                              <input type="password" class="form-control" name="password" id="inputPassword4" placeholder="Password" required>
-                            </div>
-                        </div>
 
-                        <button type="submit" class="btn btn-primary">POST</button>
-                    </form>
+                            <button type="submit" class="btn btn-success btn-block">POST</button>
+                        </form>
+                    </div>
+
+                    <div>
+                        <h1 class="text-center">Update Password</h1>
+                        <form action="/users?_method=PUT" method="PUT" class="bg-light form shadow p-3 mb-5 bg-white rounded" id="putForm">
+                            <input type="hidden" name="_method" value="PUT">
+                            <div class="form-row">
+                                <div class="form-group col-md-12">
+                                    <label for="inputPassword4">New Password</label>
+                                    <input type="password" class="form-control" name="password" id="inputPassword4" placeholder="New password" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" value="put" class="btn btn-primary btn-block">PUT</button>
+                        </form>
+                    </div>
+
+                    <div>
+                        <form action="/users?_method=DELETE" method="POST" class="bg-light form shadow p-3 mb-5 bg-white rounded justify-content-center" id="deleteForm">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <h4 class="text-center text-success">{{response}}</h4>
+                            <button type="submit" value="delete" class="btn btn-danger btn-lg btn-block">Sign out and Delete account</button>
+                        </form>
+                    </div>
+
+                    <div>
+                        <form action="/sign_out?_method=DELETE" method="POST" class="bg-light form shadow p-3 mb-5 bg-white rounded justify-content-center" id="signoutForm">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <h4 class="text-center text-success">{{response}}</h4>
+                            <button type="submit" value="delete" class="btn btn-danger btn-lg btn-block">Sign Out</button>
+                        </form>
+                    </div>
                 </div>
 
                 <div class="table-responsive col-md-8">
@@ -74,13 +124,11 @@
                         <tbody class="table-striped">
                             <ul>
                                 {% for user in data %}
-                                    <tr class="table-light" data-href="https://google.com">
-                                        <a href="#" class="link">
+                                    <tr class="table-light" onclick="window.location='/users/{{user.id}}'">
                                             <td scope="row">{{user.firstname}}</td>
                                             <td>{{user.lastname}}</td>
                                             <td>{{user.age}}</td>
                                             <td>{{user.email}}</td>
-                                        </a>
                                     </tr>
                                 {% endfor %}
                             </ul>
@@ -90,9 +138,30 @@
             </div>
         </div>
         <script type="text/javascript">      
-            let form = document.querySelector("#myForm");
-            form.addEventListener("submit", function (event) {
-                HTMLFormElement.prototype.submit.call(form);
+            let postForm = document.querySelector("#postForm");
+            postForm.addEventListener("submit", function (event) {
+                HTMLFormElement.prototype.submit.call(postForm);
+                event.preventDefault();
+                return false;
+            });
+
+            let putForm = document.querySelector("#putForm");
+            putForm.addEventListener("submit", function (event) {
+                HTMLFormElement.prototype.submit.call(putForm);
+                event.preventDefault();
+                return false;
+            });
+
+            let deleteForm = document.querySelector("#deleteForm");
+            deleteForm.addEventListener("submit", function (event) {
+                HTMLFormElement.prototype.submit.call(deleteForm);
+                event.preventDefault();
+                return false;
+            });
+
+            let signoutForm = document.querySelector("#signoutForm");
+            signoutForm.addEventListener("submit", function (event) {
+                HTMLFormElement.prototype.submit.call(signoutForm);
                 event.preventDefault();
                 return false;
             });
