@@ -9,8 +9,10 @@
 <body>
     <div class="container-fluid bg-dark vh-100 d-flex flex-column justify-content-center align-items-center">
         <h1 class="text-center text-{{color}}">{{response}}</h1>
+        
         <form action="/sign_in" method="POST" id="myForm" class="bg-light form shadow p-3 mb-5 bg-white rounded col-md-4">
             <h1 class="text-center">Login</h1>
+        
             <div class="form-group">
                 <label for="inputEmail">Email address</label>
                 <input type="email" name="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" placeholder="Email" required>
@@ -24,8 +26,10 @@
 
             <button type="submit" class="btn btn-success btn-block">Sign In</button>
         </form>
+        
         <a href="/users" class="btn btn-primary">Go Back</a>
     </div>
+    
     <script>
         let form = document.querySelector("#myForm");
             form.addEventListener("submit", function (event) {
