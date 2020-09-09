@@ -32,7 +32,7 @@ app = Flask(__name__, template_folder='views')
 # Do not sort the response hash keys
 app.config['JSON_SORT_KEYS'] = False
 
-# app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
+app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
 
 # Create the instances of User model and Session class
 session = Session()
@@ -111,7 +111,7 @@ def users():
     elif request.method == 'POST':
 
         # get data from the request
-        data = get_data(request)
+        # data = get_data(request)
 
         data = {
             'firstname' : request.form['firstname'],
@@ -249,6 +249,9 @@ def sign_in():
     elif request.method == 'GET':
         return render_template("login.html")
 
+
+
+
 # /sign_out route
 @app.route('/sign_out', methods=['DELETE', 'GET'])
 def sign_out():
@@ -290,11 +293,16 @@ def sign_out():
         
         return make_response(response)
 
+
+
+
 # /users/:user_id route for profile page
 @app.route('/users/<int:user_id>', methods=['GET'])
 def user(user_id):
     return render_template("profile.html", user = db.get(user_id))
     
+
+
 
 
 # main function to run the app
