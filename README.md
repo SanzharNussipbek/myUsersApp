@@ -18,19 +18,19 @@ python app.py
 
 Then, you can go to [`http://localhost:5000/`](http://web-xxxxxxxxx.docode.qwasar.io/) and you should see:
 
-![README%20MyUsersApp%20e2017e6e4c544c2681b08cb933979dec/homePage.png](README%20MyUsersApp%20e2017e6e4c544c2681b08cb933979dec/homePage.png)
+![ScreenShot](/screenshots/homePage.png)
 
 When you click on 'Go to Users', you will redirected to /users route:
 
-![README%20MyUsersApp%20e2017e6e4c544c2681b08cb933979dec/usersPage.png](README%20MyUsersApp%20e2017e6e4c544c2681b08cb933979dec/usersPage.png)
+![ScreenShot](/screenshots/usersPage.png)
 
 If you click on 'Sign in' button at the top, you will go to login page:
 
-![README%20MyUsersApp%20e2017e6e4c544c2681b08cb933979dec/loginPage.png](README%20MyUsersApp%20e2017e6e4c544c2681b08cb933979dec/loginPage.png)
+![ScreenShot](/screenshots/loginPage.png)
 
 After you login, you can go back to /users page and see that 'Sign in' button turned into 'My Profile' button. By clicking on it, you will see your profile page. You can also click on any user in the table and see his/her profile:
 
-![README%20MyUsersApp%20e2017e6e4c544c2681b08cb933979dec/profilePage.png](README%20MyUsersApp%20e2017e6e4c544c2681b08cb933979dec/profilePage.png)
+![ScreenShot](/screenshots/profilePage.png)
 
 ## The web-app consists of several dependancies in different files:
 
