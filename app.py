@@ -6,6 +6,8 @@ from my_user_model import User
 from session import Session
 from werkzeug.wrappers import Request
 
+
+# Class for rewriting methods from html forms since forms do not support PUT and DELETE methods
 class MethodRewriteMiddleware(object):
     def __init__(self, app, input_name='_method'):
         self.app = app
@@ -22,26 +24,37 @@ class MethodRewriteMiddleware(object):
 
         return self.app(environ, start_response)
 
+
 # Create an engine for connecting to SQLite3.
 # Assuming my_user_app.db is in your app root folder
 e = create_engine('sqlite:///my_user_app.db')
 
+
 # Create a Flask app with the given name and with template folders set to 'views' folder
 app = Flask(__name__, template_folder='views')
+
 
 # Do not sort the response hash keys
 app.config['JSON_SORT_KEYS'] = False
 
-app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
+
+# Use method rewriting class on our app
+# app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
+
 
 # Create the instances of User model and Session class
 session = Session()
 db = User()
 
+# Template for empty response in template rendering
 EMPTY_RESPONSE = {'text':'', 'id':''}
+
 
 # Process the request and get the needed data from it
 def get_data(request):
+
+    if request.form:
+        return request.form
 
     # get data from the request and cut the ends
     data = request.get_data()
@@ -71,7 +84,7 @@ def get_data(request):
         #if all arguments were sent as a json
         else:
             data = eval(data)
-    
+
     return data
 
 
@@ -102,24 +115,16 @@ def users():
                                 data = db.all(password=False), 
                                 auth = auth, 
                                 profile = profile, 
-                                update = {'text':'', 'id':''},
-                                sign_out_delete = {'text':'', 'id':''},
-                                sign_out = {'text':'', 'id':''}
+                                update = EMPTY_RESPONSE,
+                                sign_out_delete = EMPTY_RESPONSE,
+                                sign_out = EMPTY_RESPONSE
                             )
     
     # POST method: create a new user
     elif request.method == 'POST':
 
         # get data from the request
-        # data = get_data(request)
-
-        data = {
-            'firstname' : request.form['firstname'],
-            'lastname' : request.form['lastname'],
-            'age' : request.form['age'],
-            'email' : request.form['email'],
-            'password' : request.form['password'],
-        }
+        data = get_data(request)
 
         # create new user and get his id and info
         new_user_id = db.create(data)
@@ -157,10 +162,10 @@ def users():
                                 )
         
         # get data from the request
-        # data = get_data(request)
+        data = get_data(request)
 
         # update the user
-        user = db.update(session.user_id, 'password', request.form['password'])
+        user = db.update(session.user_id, 'password', data['password'])
         
         # return the user info
         # return make_response(user)
@@ -210,12 +215,7 @@ def sign_in():
     if request.method == 'POST':
 
         # get data from the request
-        # data = get_data(request)
-
-        data = {
-            'email' : request.form['email'],
-            'password': request.form['password']
-        }
+        data = get_data(request)
 
         # get user's id by his email and password
         user_id_email = db.get_id('email', data['email'])
