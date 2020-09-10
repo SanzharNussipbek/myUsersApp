@@ -106,6 +106,7 @@ class User:
             print("Error while executing a query.")
             return {}
 
+    # Get id of the user by his attribute and its value
     def get_id(self, attribute: str, value: str) -> id:
         try:
             conn = sqlite3.connect('my_user_app.db')
@@ -219,7 +220,7 @@ class User:
         for user_info in users:
             self.print_user(user_info)
 
-    # Populate the database
+    # Populate the database with mock data
     def populate(self) -> None:
         users = [
             {

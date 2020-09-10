@@ -3,7 +3,7 @@
 class Session():
 
     # Create an instance of the class
-    # Set the initial values of the user_id and loggedIn variables to None and False
+    # Set the initial values of the user_id and loggedIn variables to None and False respectively
     def __init__(self):
         self.user_id = None
         self.loggedIn = False

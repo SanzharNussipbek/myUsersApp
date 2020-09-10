@@ -1,46 +1,18 @@
-from flask import Flask, request, jsonify, make_response, render_template
-from flask_restful import Resource, Api
+from flask import Flask, request, make_response, render_template
 from sqlalchemy import create_engine
-from json import dumps, loads
 from my_user_model import User
 from session import Session
-from werkzeug.wrappers import Request
-
-
-# Class for rewriting methods from html forms since forms do not support PUT and DELETE methods
-class MethodRewriteMiddleware(object):
-    def __init__(self, app, input_name='_method'):
-        self.app = app
-        self.input_name = input_name
-
-    def __call__(self, environ, start_response):
-        request = Request(environ)
-
-        if self.input_name in request.form:
-            method = request.form[self.input_name].upper()
-
-            if method in ['GET', 'POST', 'PUT', 'DELETE']:
-                environ['REQUEST_METHOD'] = method
-
-        return self.app(environ, start_response)
 
 
 # Create an engine for connecting to SQLite3.
 # Assuming my_user_app.db is in your app root folder
 e = create_engine('sqlite:///my_user_app.db')
 
-
 # Create a Flask app with the given name and with template folders set to 'views' folder
 app = Flask(__name__, template_folder='views')
 
-
 # Do not sort the response hash keys
 app.config['JSON_SORT_KEYS'] = False
-
-
-# Use method rewriting class on our app
-# app.wsgi_app = MethodRewriteMiddleware(app.wsgi_app)
-
 
 # Create the instances of User model and Session class
 session = Session()
@@ -53,6 +25,7 @@ EMPTY_RESPONSE = {'text':'', 'id':''}
 # Process the request and get the needed data from it
 def get_data(request):
 
+    # check if the request was made from an HTML form
     if request.form:
         return request.form
 
@@ -90,12 +63,12 @@ def get_data(request):
 
 # Check if hidden method is DELETE wrapped in POST method
 def method_is_delete(request):
-    '''Workaround for a lack of delete method is the HTML spec for forms.'''
+    '''Workaround for a lack of delete method in the HTML spec for forms.'''
     return request.form.get('_method') == 'DELETE'
 
 # Check if hidden method is PUT wrapped in POST method
 def method_is_put(request):
-    '''Workaround for a lack of delete method is the HTML spec for forms.'''
+    '''Workaround for a lack of delete method in the HTML spec for forms.'''
     return request.form.get('_method') == 'PUT'
 
 # Function for DELETE request
