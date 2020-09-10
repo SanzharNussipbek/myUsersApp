@@ -88,6 +88,76 @@ def get_data(request):
     return data
 
 
+# Check if hidden method is DELETE wrapped in POST method
+def method_is_delete(request):
+    '''Workaround for a lack of delete method is the HTML spec for forms.'''
+    return request.form.get('_method') == 'DELETE'
+
+# Check if hidden method is PUT wrapped in POST method
+def method_is_put(request):
+    '''Workaround for a lack of delete method is the HTML spec for forms.'''
+    return request.form.get('_method') == 'PUT'
+
+# Function for DELETE request
+def users_delete_request(request):
+    # check if the user is logged in
+    if not session.loggedIn:
+        return render_template("index.html", 
+                                data = db.all(password=False), 
+                                sign_out_delete = {'msg': "Please login to delete the user account.", 'color': 'danger'}, 
+                                auth = 'Sign in', 
+                                profile = EMPTY_RESPONSE,
+                                update = EMPTY_RESPONSE,
+                                sign_out = EMPTY_RESPONSE
+                            )
+
+    # delete the user
+    db.destroy(session.user_id)
+
+    # sign out the user
+    session.sign_out()
+
+    return render_template("index.html", 
+                            data = db.all(password=False), 
+                            sign_out_delete = {'msg': "The user was successfully signed out and deleted.", 'color': 'success'}, 
+                            auth = 'Sign in',
+                            profile = EMPTY_RESPONSE,
+                            update = EMPTY_RESPONSE,
+                            sign_out = EMPTY_RESPONSE,
+                        )
+
+# Function for PUT request
+def users_put_request(request):
+    # check if the user is logged in
+    if not session.loggedIn:
+        return render_template("index.html", 
+                                data = db.all(password=False), 
+                                update = {'msg': "Please login to change the password", 'color': 'danger'}, 
+                                auth = 'Sign in', 
+                                profile = EMPTY_RESPONSE,
+                                sign_out_delete = EMPTY_RESPONSE,
+                                sign_out = EMPTY_RESPONSE,
+                            )
+    
+    # get data from the request
+    data = get_data(request)
+
+    # update the user
+    user = db.update(session.user_id, 'password', data['password'])
+    
+    # return the user info
+    # return make_response(user)
+
+    return render_template("index.html", 
+                            data = db.all(password=False), 
+                            update={'msg': "Password successully changed", 'color': 'success'}, 
+                            auth='', 
+                            profile = {'text': 'My Profile', 'id': session.user_id},
+                            sign_out_delete = EMPTY_RESPONSE,
+                            sign_out = EMPTY_RESPONSE
+                        )
+
+
 # default route
 @app.route('/')
 def welcome():
@@ -123,6 +193,13 @@ def users():
     # POST method: create a new user
     elif request.method == 'POST':
 
+        # Check if there are any hidden methods
+        if method_is_delete(request):
+            return users_delete_request(request)
+        
+        elif method_is_put(request):
+            return users_put_request(request)
+
         # get data from the request
         data = get_data(request)
 
@@ -149,63 +226,12 @@ def users():
     
     # PUT method: update the password of the user who is already logged in
     elif request.method == 'PUT':
-
-        # check if the user is logged in
-        if not session.loggedIn:
-            return render_template("index.html", 
-                                    data = db.all(password=False), 
-                                    update = {'msg': "Please login to change the password", 'color': 'danger'}, 
-                                    auth = 'Sign in', 
-                                    profile = EMPTY_RESPONSE,
-                                    sign_out_delete = EMPTY_RESPONSE,
-                                    sign_out = EMPTY_RESPONSE,
-                                )
-        
-        # get data from the request
-        data = get_data(request)
-
-        # update the user
-        user = db.update(session.user_id, 'password', data['password'])
-        
-        # return the user info
-        # return make_response(user)
-
-        return render_template("index.html", 
-                                data = db.all(password=False), 
-                                update={'msg': "Password successully changed", 'color': 'success'}, 
-                                auth='', 
-                                profile = 'My Profile',
-                                sign_out_delete = EMPTY_RESPONSE,
-                                sign_out = EMPTY_RESPONSE
-                            )
+        return users_put_request(request)
     
     # DELETE method: sign out the user and delete him from the table
     elif request.method == 'DELETE':
-        # check if the user is logged in
-        if not session.loggedIn:
-            return render_template("index.html", 
-                                    data = db.all(password=False), 
-                                    sign_out_delete = {'msg': "Please login to delete the user account.", 'color': 'danger'}, 
-                                    auth = 'Sign in', 
-                                    profile = EMPTY_RESPONSE,
-                                    update = EMPTY_RESPONSE,
-                                    sign_out = EMPTY_RESPONSE
-                                )
+        return users_delete_request(request)
 
-        # delete the user
-        db.destroy(session.user_id)
-
-        # sign out the user
-        session.sign_out()
-
-        return render_template("index.html", 
-                                data = db.all(password=False), 
-                                sign_out_delete = {'msg': "The user was successfully signed out and deleted.", 'color': 'success'}, 
-                                auth = 'Sign in',
-                                profile = EMPTY_RESPONSE,
-                                update = EMPTY_RESPONSE,
-                                sign_out = EMPTY_RESPONSE,
-                            )
 
 # /sign_in route
 @app.route('/sign_in', methods=['POST', 'GET'])
@@ -250,37 +276,36 @@ def sign_in():
         return render_template("login.html")
 
 
-
-
 # /sign_out route
-@app.route('/sign_out', methods=['DELETE', 'GET'])
+@app.route('/sign_out', methods=['POST', 'GET'])
 def sign_out():
 
     # DELETE method: sign out the user
-    if request.method == 'DELETE':
+    if request.method == 'POST':
+        if request.form.get('_method') == 'DELETE':
+            # Check if the user is signed in
+            if not session.loggedIn:
+                return render_template("index.html", 
+                                        data = db.all(password=False), 
+                                        auth = "Sign in", 
+                                        profile = EMPTY_RESPONSE,
+                                        sign_out = {'msg': "Please login to sign out.", 'color': 'danger'},
+                                        update = EMPTY_RESPONSE,
+                                        sign_out_delete = EMPTY_RESPONSE
+                                    )
 
-        # Check if the user is signed in
-        if not session.loggedIn:
+            # sign out the user
+            session.sign_out()
+
             return render_template("index.html", 
                                     data = db.all(password=False), 
                                     auth = "Sign in", 
                                     profile = EMPTY_RESPONSE,
-                                    sign_out = {'msg': "Please login to sign out.", 'color': 'danger'},
+                                    sign_out = {'msg':"The user was successfully signed out and deleted", 'color':'success'},
                                     update = EMPTY_RESPONSE,
-                                    sign_out_delete = EMPTY_RESPONSE
+                                    sign_out_delete = EMPTY_RESPONSE,
                                 )
-
-        # sign out the user
-        session.sign_out()
-
-        return render_template("index.html", 
-                                data = db.all(password=False), 
-                                auth = "Sign in", 
-                                profile = EMPTY_RESPONSE,
-                                sign_out = {'msg':"The user was successfully signed out and deleted", 'color':'danger'},
-                                update = EMPTY_RESPONSE,
-                                sign_out_delete = EMPTY_RESPONSE,
-                            )
+        return 'Invalid method'
 
     # GET method: get the information of the session
     elif request.method == 'GET':
@@ -294,16 +319,11 @@ def sign_out():
         return make_response(response)
 
 
-
-
 # /users/:user_id route for profile page
 @app.route('/users/<int:user_id>', methods=['GET'])
 def user(user_id):
     return render_template("profile.html", user = db.get(user_id))
     
-
-
-
 
 # main function to run the app
 if __name__ == '__main__':
