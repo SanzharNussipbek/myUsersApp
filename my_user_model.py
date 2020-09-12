@@ -27,13 +27,19 @@ class User:
         return len(user_details) == 5 and type(user_details[0]) == str and type(user_details[1]) == str and (type(user_details[2]) == int or type(user_details[2]) == str) and type(user_details[3]) == str and type(user_details[4]) == str
     
     # Check if a user with the given id already exists
-    def exists(self, user_id: int) -> bool:
+    def exists(self, attribute: str, value: int or str) -> bool:
         try:
             conn = sqlite3.connect('my_user_app.db')
             c = conn.cursor()
-            res = c.execute("""SELECT COUNT(*) 
-                                FROM users 
-                                WHERE id=%d""" % user_id)
+            if type(value) == int:
+                res = c.execute("""SELECT COUNT(*) 
+                                    FROM users 
+                                    WHERE %s=%d""" % (attribute, value))
+            elif type(value) == str:
+                res = c.execute("""SELECT COUNT(*) 
+                                    FROM users 
+                                    WHERE %s=%s""" % (attribute, value))
+
             conn.commit()
             res = res.fetchone() != 0
             conn.close()
@@ -61,6 +67,14 @@ class User:
         try:
             if not self.valid_info(list(user_info.values())):
                 print('User details are not valid.')
+                return -1
+                
+            if self.exists('email', user_info['email']):
+                print("The user with this email already exists.")
+                return -1
+
+            if self.exists('password', user_info['password']):
+                print("The user with this password already exists.")
                 return -1
             
             conn = sqlite3.connect('my_user_app.db')
@@ -126,7 +140,7 @@ class User:
             return -1
     
     # Get all entries from the table
-    def all(self, password = True) -> list:
+    def all(self, password = False) -> list:
         try:
             conn = sqlite3.connect('my_user_app.db')
             c = conn.cursor()
@@ -178,7 +192,7 @@ class User:
         try:
             conn = sqlite3.connect('my_user_app.db')
             c = conn.cursor()
-            if not self.exists(user_id):
+            if not self.exists('id', user_id):
                 print('>>User with id "%d" does not exist' % user_id)
                 return
             
